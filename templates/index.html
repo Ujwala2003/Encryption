@@ -17,9 +17,16 @@
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
-    h1,h3 {
+    h1 {
       text-align: center;
       color: #333;
+      margin-top: 0;
+    }
+
+    h3 {
+      text-align: center;
+      color: #888;
+      margin-top: 5px;
     }
 
     form {
@@ -34,8 +41,7 @@
     }
     
     textarea {
-      width: 300px;
-      height: 150px;
+      width: 100%;
       padding: 5px;
       border: 1px solid #ccc;
       border-radius: 5px;
@@ -58,23 +64,27 @@
       padding: 10px;
       background-color: #f9f9f9;
       color: #333;
-      overflow-wrap: break-word;
+      word-wrap: break-word;
     }
   </style>
 </head>
 <body>
   <div class="content">
-    <h1>Data Encryption</h1><h3>{{edt}}</h3>
-  
+    <h1>Data Encryption</h1>
+    <h3>{{edt}}</h3>
+    
     <form id="encryptionForm">
       <label for="data">Data to Encrypt/Decrypt:</label>
       <textarea id="data" name="data" required></textarea>
+      <br><br>
       
       <label for="key">Encryption/Decryption Key:</label>
       <input type="password" id="key" name="key" required>
       <br><br>
-      <input type="submit" id="encryptButton" value="Encrypt">
-      <input type="submit" id="decryptButton" value="Decrypt">
+      <div style="text-align: center;">
+        <input type="submit" id="encryptButton" value="Encrypt"> &nbsp;&nbsp;
+        <input type="submit" id="decryptButton" value="Decrypt">
+      </div>
     </form>
     
     <label for="data">Encrypted/Decrypted Data:</label>
@@ -110,12 +120,39 @@
     }
     
     function encryptAES(data, key) {
-      var encryptedData = CryptoJS.AES.encrypt(data, key).toString();
-      return encryptedData;
+      var salt = CryptoJS.lib.WordArray.random(16); // Generate a random salt
+      var derivedKey = CryptoJS.PBKDF2(key, salt, {
+        keySize: 256 / 32, // 256-bit key
+        iterations: 10000, // Number of iterations for key derivation
+        hasher: CryptoJS.algo.SHA256 // Hashing algorithm for key derivation
+      });
+
+      var encryptedData = CryptoJS.AES.encrypt(data, derivedKey, {
+        iv: salt // Use the salt as the initialization vector (IV)
+      }).toString();
+
+      // Combine the salt and encrypted data for storage
+      var combinedData = CryptoJS.enc.Hex.stringify(salt) + encryptedData;
+
+      return combinedData;
     }
-    
+
     function decryptAES(data, key) {
-      var decryptedData = CryptoJS.AES.decrypt(data, key).toString(CryptoJS.enc.Utf8);
+      var salt = CryptoJS.enc.Hex.parse(data.substr(0, 32));
+      var encryptedData = data.substr(32);
+
+      var derivedKey = CryptoJS.PBKDF2(key, salt, {
+        keySize: 256 / 32,
+        iterations: 10000,
+        hasher: CryptoJS.algo.SHA256
+      });
+
+      var decryptedData = CryptoJS.AES.decrypt(encryptedData, derivedKey, {
+        iv: salt,
+        padding: CryptoJS.pad.Pkcs7,
+        mode: CryptoJS.mode.CBC
+      }).toString(CryptoJS.enc.Utf8);
+
       return decryptedData;
     }
     
