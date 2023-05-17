@@ -60,4 +60,4 @@ jobs:
         with:
           app-name: 'AESEncryption'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CF96D0B7277F48EE8D61DA3104522D0E }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_72F244E4932E496BAFED2E3AA12D1B76 }}
