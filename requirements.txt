@@ -1,4 +1,6 @@
 django==4.0.2
 pyrebase
 urllib3
---upgrade pip wheel setuptools requests
+wheel 
+setuptools 
+requests
